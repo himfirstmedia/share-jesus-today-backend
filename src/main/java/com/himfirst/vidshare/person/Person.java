@@ -25,4 +25,6 @@ public class Person extends BaseEntity implements Serializable {
     private String city;
     private String phone;
     private String address;
+    private int otp;
+    private boolean otpVerified =false;
 }

@@ -26,7 +26,9 @@ public class PersonModel extends BaseModel {
     private String city;
     private String phone;
     private String address;
-    @NotNull(message = "Password must be provided")
-    @Size(min = 4, message = "Last Name must be equal or greater than 4 characters")
-    private String password;
+//    @NotNull(message = "Password must be provided")
+//    @Size(min = 4, message = "Last Name must be equal or greater than 4 characters")
+//    private String password;
+    private int otp;
+    private boolean otpVerified =false;
 }

@@ -9,12 +9,14 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.himfirst</groupId>
-    <artifactId>video share</artifactId>
+    <artifactId>video-share</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>video share</name>
     <description>video share</description>
     <properties>
         <java.version>11</java.version>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
     </properties>
     <dependencies>
         <dependency>

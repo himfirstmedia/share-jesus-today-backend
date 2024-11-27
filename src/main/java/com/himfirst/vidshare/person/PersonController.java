@@ -21,17 +21,17 @@ public class PersonController  {
         return new ResponseEntity<>(personService.signUp(person), HttpStatus.CREATED);
     }
 
-    @PutMapping("/verify-otp")
+    @PutMapping("/sign-up/verify-otp")
     public ResponseEntity<PersonModel> verifyOtp(@RequestParam String email, @RequestParam int otp){
         return new ResponseEntity<>(personService.verifyOTP(email, otp), HttpStatus.OK);
     }
 
-    @PutMapping("/set-password")
+    @PutMapping("/sign-up/set-password")
     public ResponseEntity<PersonModel> setPassword(@RequestParam String email, @RequestParam String password){
         return new ResponseEntity<>(personService.setPassword(email, password), HttpStatus.OK);
     }
 
-    @GetMapping("/find-by-email/{email}")
+    @GetMapping("/sign-up/find-by-email/{email}")
     public ResponseEntity<PersonModel> findByEmail(@Valid @PathVariable String email){
         return new ResponseEntity<>(personService.findByEmail(email), HttpStatus.OK);
     }

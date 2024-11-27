@@ -12,7 +12,6 @@ import javax.validation.constraints.NotNull;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
 public class VideoModel extends BaseModel {
     @NotNull(message = "Title must be provided")
     private String title;

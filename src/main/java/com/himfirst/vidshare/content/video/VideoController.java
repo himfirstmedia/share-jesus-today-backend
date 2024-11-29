@@ -22,15 +22,20 @@ import java.util.UUID;
 @RequestMapping("api/v1/video")
 @CrossOrigin
 public class VideoController {
+    private final VideoService videoService;
     private static final String UPLOAD_DIR = "/path/to/upload/directory";
 
+    public VideoController(VideoService videoService) {
+        this.videoService = videoService;
+    }
+
     @PostMapping("/upload")
-    public String uploadVideo(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<String> uploadVideo(@RequestParam("file") MultipartFile file) {
         if (file.isEmpty()) {
-            return "Failed to upload video. File is empty.";
+            return new ResponseEntity<>("Failed to upload video. File is empty.", HttpStatus.OK);
         }
         if (!Objects.equals(file.getContentType(), "video/mp4")) {
-            return "Failed to upload video. Only MP4 files are allowed.";
+            return new ResponseEntity<>("Failed to upload video. Only MP4 files are allowed.", HttpStatus.OK);
         }
 
         // Create the upload directory if it doesn't exist
@@ -39,17 +44,8 @@ public class VideoController {
             uploadDir.mkdirs();
         }
 
-        // Create a new file in the upload directory
-        File uploadFile = new File(uploadDir.getAbsolutePath() + File.separator + file.getOriginalFilename());
+        return new ResponseEntity<>(videoService.uploadVideo(uploadDir, file), HttpStatus.OK);
 
-        // Write the uploaded file to the newly created file
-        try (FileOutputStream fos = new FileOutputStream(uploadFile)) {
-            fos.write(file.getBytes());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        return "Video uploaded successfully";
     }
 
     @GetMapping("/stream/{videoId}")

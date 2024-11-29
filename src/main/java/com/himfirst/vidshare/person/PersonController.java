@@ -11,9 +11,11 @@ import javax.validation.Valid;
 public class PersonController  {
 
     private final PersonService personService;
+    private final EmailService emailService;
 
-    public PersonController(PersonService personService) {
+    public PersonController(PersonService personService, EmailService emailService) {
         this.personService = personService;
+        this.emailService = emailService;
     }
 
     @PostMapping("/sign-up")
@@ -34,6 +36,13 @@ public class PersonController  {
     @GetMapping("/sign-up/find-by-email/{email}")
     public ResponseEntity<PersonModel> findByEmail(@Valid @PathVariable String email){
         return new ResponseEntity<>(personService.findByEmail(email), HttpStatus.OK);
+    }
+
+    @PostMapping("/sign-up/email-test/{email}")
+    public ResponseEntity<String> signUp(@PathVariable String email){
+        //String to, String subject, String text
+        emailService.sendSimpleMessage(email, "SHARE JESUS TODAY TEST", "00000");
+        return new ResponseEntity<>("Sent", HttpStatus.OK);
     }
 
 }

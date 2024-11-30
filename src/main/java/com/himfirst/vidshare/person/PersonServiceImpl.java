@@ -27,15 +27,17 @@ public class PersonServiceImpl extends BaseServiceImpl<Person, UUID> implements 
 
     private final UserRoleService userRoleService;
     private final PersonRepo personRepo;
+    private final EmailService emailService;
 
     private final Logger logger = LoggerFactory.getLogger(PersonServiceImpl.class);
 
-    public PersonServiceImpl(PersonRepo personRepo, ModelMapper modelMapper, UserService userService, UserRoleService userRoleService) {
+    public PersonServiceImpl(PersonRepo personRepo, ModelMapper modelMapper, UserService userService, UserRoleService userRoleService, EmailService emailService) {
         super(personRepo, modelMapper);
         this.modelMapper = modelMapper;
         this.userService = userService;
         this.userRoleService = userRoleService;
         this.personRepo = personRepo;
+        this.emailService = emailService;
     }
 
     @Override
@@ -57,6 +59,14 @@ public class PersonServiceImpl extends BaseServiceImpl<Person, UUID> implements 
         person.setOtp(generateRandomOTP());
         person.setOtpVerified(false);
             Person saved = super.save(person);
+            String txt ="Hello!\n" +
+                    "\n" +
+                    "Your One-Time Password (OTP) for logging into 'Share Jesus Today' is: " +person.getOtp()+
+                    "\n" +
+                    "Please use this OTP to complete your login. The OTP is valid for a limited time.\n" +
+                    "\n" +
+                    "Thank you for using 'Share Jesus Today'.";
+            emailService.sendSimpleMessage(saved.getEmail(), "SHARE JESUS TODAY", txt);
             return modelMapper.map(saved, PersonModel.class);
 
         } else {

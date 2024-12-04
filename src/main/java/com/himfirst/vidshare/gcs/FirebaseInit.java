@@ -14,13 +14,14 @@ import java.io.IOException;
 public class FirebaseInit {
     @PostConstruct
     public void initialize() throws IOException {
+        String path = "/Users/kazkaz/IdeaProjects/share-jesus-today-backend/serviceAcount.json";
         FileInputStream serviceAccount =
-                new FileInputStream("/home/qci_user/apps/v2/QCiStaffSacco/serviceAcount.json");// /home/qci_user/apps/v2/QCiStaffSacco
+                new FileInputStream(path);
         //  ./serviceAcount.json
 
         FirebaseOptions options = FirebaseOptions.builder()
                 .setCredentials(GoogleCredentials.fromStream(serviceAccount))
-                .setDatabaseUrl("https://qc-sacco-default-rtdb.firebaseio.com")
+//                .setDatabaseUrl("https://qc-sacco-default-rtdb.firebaseio.com")
                 .setStorageBucket("qc-sacco.appspot.com")
                 .build();
 

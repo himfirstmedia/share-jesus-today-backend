@@ -1,5 +1,9 @@
 package com.himfirst.vidshare.content.video;
 
+import com.google.cloud.storage.Blob;
+import com.himfirst.vidshare.exceptions.ApiResponseException;
+import com.himfirst.vidshare.gcs.file.FileService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -9,18 +13,26 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.Principal;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("api/v1/video")
 @CrossOrigin
+@Slf4j
 public class VideoController {
     private final VideoService videoService;
     private static final String UPLOAD_DIR = "/path/to/upload/directory";
@@ -30,50 +42,91 @@ public class VideoController {
     }
 
     @PostMapping("/upload")
-    public ResponseEntity<String> uploadVideo(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<VideoModel> uploadVideo(@RequestParam("file") MultipartFile file,
+                                                  @RequestParam(required = false) String title,
+                                                  @RequestParam(required = false) String caption, Principal principal) {
+
         if (file.isEmpty()) {
-            return new ResponseEntity<>("Failed to upload video. File is empty.", HttpStatus.OK);
-        }
-        if (!Objects.equals(file.getContentType(), "video/mp4")) {
-            return new ResponseEntity<>("Failed to upload video. Only MP4 files are allowed.", HttpStatus.OK);
+            throw new ApiResponseException("Failed to upload video. File is empty.");
         }
 
-        // Create the upload directory if it doesn't exist
-        File uploadDir = new File(UPLOAD_DIR);
-        if (!uploadDir.exists()) {
-            uploadDir.mkdirs();
+        if (!Objects.requireNonNull(file.getContentType()).startsWith("video/") ||
+                (!Objects.equals(file.getContentType(), "video/mp4") &&
+                        !Objects.equals(file.getContentType(), "video/quicktime"))) {
+            throw new ApiResponseException("Failed to upload video. Only MP4 and MOV files are allowed.");
         }
 
-        return new ResponseEntity<>(videoService.uploadVideo(uploadDir, file), HttpStatus.OK);
+        return new ResponseEntity<>(videoService.uploadVideo(file, title, caption, principal.getName()), HttpStatus.OK);
 
     }
 
-    @GetMapping("/stream/{videoId}")
-    public ResponseEntity<Resource> streamVideo(@PathVariable UUID videoId) {
-        String fileName = videoId.toString() + ".mp4";
+//    @GetMapping("/test")
+//    public ResponseEntity<String> streamVideo(Principal principal) {
+//        log.info(principal.getName());
+//        return new ResponseEntity<>(principal.getName(), HttpStatus.OK);
+//    }
 
-        // Construct the path to the video file
-        Path videoPath = Paths.get(UPLOAD_DIR, fileName);
-
-        try {
-            // Read the video file into a byte array
-            byte[] videoBytes = Files.readAllBytes(videoPath);
-
-            // Wrap the byte array in a ByteArrayResource
-            ByteArrayResource videoResource = new ByteArrayResource(videoBytes);
-
-            // Build the response with the video file
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.parseMediaType("video/mp4"));
-
-            return ResponseEntity.ok()
-                    .headers(headers)
-                    .contentLength(videoBytes.length)
-                    .body(videoResource);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
+    @GetMapping("/public/all")
+    public ResponseEntity<List<VideoModel>> getAllVideos(Principal principal) {
+        log.info(principal.getName());
+        return new ResponseEntity<>(videoService.getAll(), HttpStatus.OK);
     }
+
+//    @GetMapping("/public/stream/{videoId}")
+//    public void streamVideo(@PathVariable UUID videoId, HttpServletRequest request, HttpServletResponse response) throws IOException {
+//        Video video = videoService.findById(videoId);
+//        Blob blob = fileService.getBolb(video.getUrl());
+//
+//        if (blob == null) {
+//            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+//            return;
+//        }
+//
+//        String range = request.getHeader("Range");
+//        long fileSize = blob.getSize();
+//        response.setContentType("video/quicktime");
+//        response.setHeader("Accept-Ranges", "bytes");
+//
+//        try (ReadableByteChannel channel = blob.reader();
+//             OutputStream outputStream = response.getOutputStream()) {
+//
+//            if (range == null) {
+//                // Full content response
+//                response.setStatus(HttpServletResponse.SC_OK);
+//                streamData(channel, outputStream, fileSize);
+//            } else {
+//                // Partial content response
+//                String[] ranges = range.replace("bytes=", "").split("-");
+//                long start = Long.parseLong(ranges[0]);
+//                long end = ranges.length > 1 ? Long.parseLong(ranges[1]) : fileSize - 1;
+//
+//                if (start >= fileSize || end >= fileSize) {
+//                    response.setStatus(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
+//                    response.setHeader("Content-Range", "bytes */" + fileSize);
+//                    return;
+//                }
+//
+//                response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
+//                response.setHeader("Content-Range", "bytes " + start + "-" + end + "/" + fileSize);
+//
+//                blob.reader().seek(start);
+//                streamData(channel, outputStream, end - start + 1);
+//            }
+//        }
+//    }
+//
+//    private void streamData(ReadableByteChannel channel, OutputStream outputStream, long limit) throws IOException {
+//        ByteBuffer buffer = ByteBuffer.allocate(8192); // Larger buffer for efficiency
+//        long bytesWritten = 0;
+//
+//        while (channel.read(buffer) > 0 && bytesWritten < limit) {
+//            buffer.flip();
+//            int bytesToWrite = (int) Math.min(buffer.remaining(), limit - bytesWritten);
+//            outputStream.write(buffer.array(), 0, bytesToWrite);
+//            bytesWritten += bytesToWrite;
+//            buffer.clear();
+//        }
+//    }
+
 
 }

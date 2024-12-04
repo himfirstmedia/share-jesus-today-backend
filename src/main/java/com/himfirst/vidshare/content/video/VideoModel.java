@@ -24,4 +24,5 @@ public class VideoModel extends BaseModel {
     private boolean reported = false;
     @NotNull(message = "Uploader must be provided")
     private Person uploader;
+    private String fullUrl;
 }

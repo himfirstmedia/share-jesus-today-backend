@@ -8,6 +8,7 @@ import javax.validation.Valid;
 
 @RestController
 @RequestMapping("api/v1/person")
+@CrossOrigin
 public class PersonController  {
 
     private final PersonService personService;
@@ -19,7 +20,7 @@ public class PersonController  {
     }
 
     @PostMapping("/sign-up")
-    public ResponseEntity<PersonModel> signUp(@Valid @RequestBody PersonModel person){
+    public ResponseEntity<PersonModel> signUp( @Valid @RequestBody PersonModel person){
         return new ResponseEntity<>(personService.signUp(person), HttpStatus.CREATED);
     }
 

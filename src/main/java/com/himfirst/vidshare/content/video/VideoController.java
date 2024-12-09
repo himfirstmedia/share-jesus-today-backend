@@ -1,29 +1,12 @@
 package com.himfirst.vidshare.content.video;
 
-import com.google.cloud.storage.Blob;
 import com.himfirst.vidshare.exceptions.ApiResponseException;
-import com.himfirst.vidshare.gcs.file.FileService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.ByteBuffer;
-import java.nio.channels.ReadableByteChannel;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.Principal;
 import java.util.List;
 import java.util.Objects;
@@ -35,7 +18,6 @@ import java.util.UUID;
 @Slf4j
 public class VideoController {
     private final VideoService videoService;
-    private static final String UPLOAD_DIR = "/path/to/upload/directory";
 
     public VideoController(VideoService videoService) {
         this.videoService = videoService;
@@ -60,17 +42,37 @@ public class VideoController {
 
     }
 
-//    @GetMapping("/test")
-//    public ResponseEntity<String> streamVideo(Principal principal) {
-//        log.info(principal.getName());
-//        return new ResponseEntity<>(principal.getName(), HttpStatus.OK);
-//    }
-
     @GetMapping("/public/all")
-    public ResponseEntity<List<VideoModel>> getAllVideos(Principal principal) {
-        log.info(principal.getName());
+    public ResponseEntity<List<VideoModel>> getAllVideos() {
         return new ResponseEntity<>(videoService.getAll(), HttpStatus.OK);
     }
+
+    @GetMapping("/public/all-page")
+    public ResponseEntity<VideoPage> getVideosByPage(@RequestParam(defaultValue = "0") int page,
+                                                     @RequestParam(defaultValue = "100") int size,
+                                                     @RequestParam(defaultValue = "createdTimestamp") String sortBy,
+                                                     @RequestParam(defaultValue = "DESC") String sortOrder) {
+        return ResponseEntity.ok(videoService.findAll(page, size, sortBy, sortOrder));
+    }
+
+    @GetMapping("/public/person/{personId}")
+    public ResponseEntity<VideoPage> grtVideosByPersonId(@RequestParam UUID personId, @RequestParam(defaultValue = "0") int page,
+                                                  @RequestParam(defaultValue = "100") int size,
+                                                  @RequestParam(defaultValue = "createdTimestamp") String sortBy,
+                                                  @RequestParam(defaultValue = "DESC") String sortOrder ) {
+        return ResponseEntity.ok(videoService.findByPersonId(personId, page, size, sortBy, sortOrder));
+    }
+
+    @GetMapping("/my-videos")
+    public ResponseEntity<VideoPage> myVideos(@RequestParam(defaultValue = "0") int page,
+                                                  @RequestParam(defaultValue = "100") int size,
+                                                  @RequestParam(defaultValue = "createdTimestamp") String sortBy,
+                                                  @RequestParam(defaultValue = "DESC") String sortOrder, Principal principal) {
+        return ResponseEntity.ok(videoService.myVideos(principal.getName(), page, size, sortBy, sortOrder));
+    }
+
+
+
 
 //    @GetMapping("/public/stream/{videoId}")
 //    public void streamVideo(@PathVariable UUID videoId, HttpServletRequest request, HttpServletResponse response) throws IOException {

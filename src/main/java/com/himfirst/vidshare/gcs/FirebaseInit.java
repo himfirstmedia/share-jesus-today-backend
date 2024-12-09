@@ -14,6 +14,7 @@ import java.io.IOException;
 public class FirebaseInit {
     @PostConstruct
     public void initialize() throws IOException {
+//        String path = "serviceAcount.json";
         String path = "/Users/kazkaz/IdeaProjects/share-jesus-today-backend/serviceAcount.json";
         FileInputStream serviceAccount =
                 new FileInputStream(path);

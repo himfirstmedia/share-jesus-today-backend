@@ -13,4 +13,11 @@ public interface VideoService extends BaseService<Video, UUID> {
     VideoModel uploadVideo(MultipartFile file, String title, String caption, String user);
 
     List<VideoModel> getAll();
+
+    VideoPage findAll(int page, int size, String sortBy, String sortOrder);
+
+    VideoPage findByPersonId(UUID personId, int page, int size, String sortBy, String sortOrder);
+
+    VideoPage myVideos(String name, int page, int size, String sortBy, String sortOrder);
+
 }

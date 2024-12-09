@@ -43,8 +43,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
                 .antMatchers("/api/v1/authenticate").permitAll()
                 .antMatchers("/api/v1/person/sign-up").permitAll()
+                .antMatchers("/api/v1/person/sign-up/**").permitAll()
+                .antMatchers("/api/v1/video/public/**").permitAll()
                 .antMatchers("/userData/admin/**").hasRole("ADMIN")
-
                 .antMatchers(
                         HttpMethod.GET,
                         "/",
@@ -58,8 +59,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         "/**/*.css",
                         "/**/*.js"
                 ).permitAll()
-
-                .antMatchers("/authenticate/**").permitAll()///profile/account
                 .anyRequest().authenticated().and().sessionManagement()
         .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

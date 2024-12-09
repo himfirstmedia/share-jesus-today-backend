@@ -12,7 +12,6 @@ import javax.validation.constraints.NotNull;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
 public class VideoModel extends BaseModel {
     @NotNull(message = "Title must be provided")
     private String title;
@@ -25,4 +24,5 @@ public class VideoModel extends BaseModel {
     private boolean reported = false;
     @NotNull(message = "Uploader must be provided")
     private Person uploader;
+    private String fullUrl;
 }

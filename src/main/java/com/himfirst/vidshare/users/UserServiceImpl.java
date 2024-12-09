@@ -1,5 +1,6 @@
 package com.himfirst.vidshare.users;
 
+import com.himfirst.vidshare.exceptions.ApiResponseException;
 import com.himfirst.vidshare.exceptions.InvalidValuesException;
 import com.himfirst.vidshare.base.BaseServiceImpl;
 import org.modelmapper.ModelMapper;
@@ -7,6 +8,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -53,5 +55,14 @@ public class UserServiceImpl extends BaseServiceImpl<User, UUID> implements User
     @Override
     public User findByPersonId(UUID personId) {
         return userRepo.findByPersonId(personId);
+    }
+
+    @Override
+    public User findByUserName(String userName) {
+        Optional<User> user = userRepo.findByUserName(userName);
+        if (user.isPresent()) {
+            return user.get();
+        }
+        throw new ApiResponseException("user not found");
     }
 }

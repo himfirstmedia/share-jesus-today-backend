@@ -6,4 +6,5 @@ import java.util.UUID;
 
 public interface UserService extends BaseService<User, UUID> {
     User findByPersonId(UUID personId);
+    User findByUserName(String userName);
 }

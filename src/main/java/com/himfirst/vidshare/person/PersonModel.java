@@ -12,7 +12,6 @@ import javax.validation.constraints.Size;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
 public class PersonModel extends BaseModel {
     @NotNull(message = "First Name must be provided")
     @Size(min = 3, message = "First Name must be equal or greater than 3 characters")
